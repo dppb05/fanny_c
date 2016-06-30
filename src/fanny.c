@@ -96,6 +96,7 @@ double run() {
     st_matrix prev_memb;
     init_st_matrix(&prev_memb, objc, clustc);
     adeq = adequacy();
+    printf("Adequacy: %.15lf\n", adeq);
     do {
         printf("Iteration %d:\n", iter);
         mtxcpy(&prev_memb, &memb);
@@ -141,15 +142,13 @@ double run() {
         adeq = adequacy();
         printf("Adequacy: %.15lf\n", adeq);
         adeq_diff = prev_adeq - adeq;
-        if(iter > 1) {
-            if(adeq_diff < 0.0) {
-                adeq_diff = abs(adeq_diff);
-                printf("Warn: previous adequacy is greater than "
-                       "current (%.15lf).\n", adeq_diff);
-            }
-            if(adeq_diff < epsilon) {
-                break;
-            }
+        if(adeq_diff < 0.0) {
+            adeq_diff = abs(adeq_diff);
+            printf("Warn: previous adequacy is greater than "
+                   "current (%.15lf).\n", adeq_diff);
+        }
+        if(adeq_diff < epsilon) {
+            break;
         }
     } while (++iter <= max_iter);
     free_st_matrix(&prev_memb);
