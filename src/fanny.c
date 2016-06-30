@@ -90,11 +90,12 @@ double run() {
     size_t k;
     size_t iter = 1;
     double a_val[clustc];
-    double adeq = 0.0;
+    double adeq;
     double prev_adeq;
     double adeq_diff;
     st_matrix prev_memb;
     init_st_matrix(&prev_memb, objc, clustc);
+    adeq = adequacy();
     do {
         printf("Iteration %d:\n", iter);
         mtxcpy(&prev_memb, &memb);
