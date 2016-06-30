@@ -223,6 +223,9 @@ int main(int argc, char **argv) {
         printf("Error: could not load matrix file.\n");
         goto END;
     }
+    double avg_partcoef;
+    double avg_modpcoef;
+    double avg_partent;
     silhouet *csil;
     silhouet *fsil;
     silhouet *avg_csil;
@@ -241,9 +244,15 @@ int main(int argc, char **argv) {
         csil = crispsil(groups, &dmatrix);
         fsil = fuzzysil(csil, groups, &memb, 1.6);
         if(i == 1) {
+            avg_partcoef = partcoef(&memb);
+            avg_modpcoef = modpcoef(&memb);
+            avg_partent = partent(&memb);
             avg_csil = csil;
             avg_fsil = fsil;
         } else {
+            avg_partcoef = (avg_partcoef + partcoef(&memb)) / 2.0;
+            avg_modpcoef = (avg_modpcoef + modpcoef(&memb)) / 2.0;
+            avg_partent = (avg_partent + partent(&memb)) / 2.0;
             avg_silhouet(avg_csil, csil);
             avg_silhouet(avg_fsil, fsil);
             free_silhouet(csil);
@@ -265,32 +274,37 @@ int main(int argc, char **argv) {
             best_inst);
     printf("\n");
     print_memb(&best_memb);
+
+    pred = defuz(&best_memb);
+    groups = asgroups(pred, objc, classc);
+    print_header("Partitions", HEADER_SIZE);
+    print_groups(groups);
+
+    print_header("Average indexes", HEADER_SIZE);
+    printf("\nPartition coefficient: %.10lf\n", avg_partcoef);
+    printf("Modified partition coefficient: %.10lf\n", avg_modpcoef);
+    printf("Partition entropy: %.10lf (max: %.10lf)\n", avg_partent,
+            log(clustc));
+
+    print_header("Best instance indexes", HEADER_SIZE);
     printf("\nPartition coefficient: %.10lf\n", partcoef(&best_memb));
     printf("Modified partition coefficient: %.10lf\n",
             modpcoef(&best_memb));
     printf("Partition entropy: %.10lf (max: %.10lf)\n",
             partent(&best_memb), log(clustc));
-//    printf("Average intra cluster distance: %.10lf\n",
-//            avg_intra_dist(&best_memb, best_dists_t , 1.6));
-    pred = defuz(&best_memb);
-//    silhouet *sil = simplesil(pred, best_dists_t);
-//    printf("\nSimple silhouette:\n");
-//    print_silhouet(sil);
-//    free_silhouet(sil);
-//    free(sil);
-    groups = asgroups(pred, objc, classc);
-    print_header("Partitions", HEADER_SIZE);
-    print_groups(groups);
+
     print_header("Averaged crisp silhouette", HEADER_SIZE);
     print_silhouet(avg_csil);
     print_header("Averaged fuzzy silhouette", HEADER_SIZE);
     print_silhouet(avg_fsil);
+
     csil = crispsil(groups, &dmatrix);
-    print_header("Crisp silhouette", HEADER_SIZE);
+    print_header("Best instance crisp silhouette", HEADER_SIZE);
     print_silhouet(csil);
     fsil = fuzzysil(csil, groups, &best_memb, 1.6);
-    print_header("Fuzzy silhouette", HEADER_SIZE);
+    print_header("Best instance fuzzy silhouette", HEADER_SIZE);
     print_silhouet(fsil);
+
     free_silhouet(avg_csil);
     free(avg_csil);
     free_silhouet(avg_fsil);
