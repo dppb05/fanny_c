@@ -156,6 +156,7 @@ double run() {
 }
 
 int main(int argc, char **argv) {
+    bool mean_idx = false;
     FILE *cfgfile = fopen(argv[1], "r");
     if(!cfgfile) {
         printf("Error: could not open config file.\n");
@@ -239,30 +240,32 @@ int main(int argc, char **argv) {
     for(i = 1; i <= insts; ++i) {
         printf("Instance %d:\n", i);
         cur_inst_adeq = run();
-        pred = defuz(&memb);
-        groups = asgroups(pred, objc, classc);
-        csil = crispsil(groups, &dmatrix);
-        fsil = fuzzysil(csil, groups, &memb, 1.6);
-        if(i == 1) {
-            avg_partcoef = partcoef(&memb);
-            avg_modpcoef = modpcoef(&memb);
-            avg_partent = partent(&memb);
-            avg_csil = csil;
-            avg_fsil = fsil;
-        } else {
-            avg_partcoef = (avg_partcoef + partcoef(&memb)) / 2.0;
-            avg_modpcoef = (avg_modpcoef + modpcoef(&memb)) / 2.0;
-            avg_partent = (avg_partent + partent(&memb)) / 2.0;
-            avg_silhouet(avg_csil, csil);
-            avg_silhouet(avg_fsil, fsil);
-            free_silhouet(csil);
-            free(csil);
-            free_silhouet(fsil);
-            free(fsil);
+        if(mean_idx) {
+            pred = defuz(&memb);
+            groups = asgroups(pred, objc, classc);
+            csil = crispsil(groups, &dmatrix);
+            fsil = fuzzysil(csil, groups, &memb, 1.6);
+            if(i == 1) {
+                avg_partcoef = partcoef(&memb);
+                avg_modpcoef = modpcoef(&memb);
+                avg_partent = partent(&memb);
+                avg_csil = csil;
+                avg_fsil = fsil;
+            } else {
+                avg_partcoef = (avg_partcoef + partcoef(&memb)) / 2.0;
+                avg_modpcoef = (avg_modpcoef + modpcoef(&memb)) / 2.0;
+                avg_partent = (avg_partent + partent(&memb)) / 2.0;
+                avg_silhouet(avg_csil, csil);
+                avg_silhouet(avg_fsil, fsil);
+                free_silhouet(csil);
+                free(csil);
+                free_silhouet(fsil);
+                free(fsil);
+            }
+            free(pred);
+            free_st_matrix(groups);
+            free(groups);
         }
-        free(pred);
-        free_st_matrix(groups);
-        free(groups);
         if(i == 1 || cur_inst_adeq < best_inst_adeq) {
             mtxcpy(&best_memb, &memb);
             best_inst_adeq = cur_inst_adeq;
@@ -280,11 +283,13 @@ int main(int argc, char **argv) {
     print_header("Partitions", HEADER_SIZE);
     print_groups(groups);
 
-    print_header("Average indexes", HEADER_SIZE);
-    printf("\nPartition coefficient: %.10lf\n", avg_partcoef);
-    printf("Modified partition coefficient: %.10lf\n", avg_modpcoef);
-    printf("Partition entropy: %.10lf (max: %.10lf)\n", avg_partent,
-            log(clustc));
+    if(mean_idx) {
+        print_header("Average indexes", HEADER_SIZE);
+        printf("\nPartition coefficient: %.10lf\n", avg_partcoef);
+        printf("Modified partition coefficient: %.10lf\n", avg_modpcoef);
+        printf("Partition entropy: %.10lf (max: %.10lf)\n", avg_partent,
+                log(clustc));
+    }
 
     print_header("Best instance indexes", HEADER_SIZE);
     printf("\nPartition coefficient: %.10lf\n", partcoef(&best_memb));
@@ -293,10 +298,12 @@ int main(int argc, char **argv) {
     printf("Partition entropy: %.10lf (max: %.10lf)\n",
             partent(&best_memb), log(clustc));
 
-    print_header("Averaged crisp silhouette", HEADER_SIZE);
-    print_silhouet(avg_csil);
-    print_header("Averaged fuzzy silhouette", HEADER_SIZE);
-    print_silhouet(avg_fsil);
+    if(mean_idx) {
+        print_header("Averaged crisp silhouette", HEADER_SIZE);
+        print_silhouet(avg_csil);
+        print_header("Averaged fuzzy silhouette", HEADER_SIZE);
+        print_silhouet(avg_fsil);
+    }
 
     csil = crispsil(groups, &dmatrix);
     print_header("Best instance crisp silhouette", HEADER_SIZE);
@@ -305,10 +312,12 @@ int main(int argc, char **argv) {
     print_header("Best instance fuzzy silhouette", HEADER_SIZE);
     print_silhouet(fsil);
 
-    free_silhouet(avg_csil);
-    free(avg_csil);
-    free_silhouet(avg_fsil);
-    free(avg_fsil);
+    if(mean_idx) {
+        free_silhouet(avg_csil);
+        free(avg_csil);
+        free_silhouet(avg_fsil);
+        free(avg_fsil);
+    }
     free_silhouet(csil);
     free(csil);
     free_silhouet(fsil);
