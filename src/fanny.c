@@ -93,13 +93,10 @@ double run() {
     double adeq;
     double prev_adeq;
     double adeq_diff;
-    st_matrix prev_memb;
-    init_st_matrix(&prev_memb, objc, clustc);
     adeq = adequacy();
     printf("Adequacy: %.15lf\n", adeq);
     do {
         printf("Iteration %d:\n", iter);
-        mtxcpy(&prev_memb, &memb);
         for(i = 0; i < objc; ++i) {
             double sum_a_val = 0.0;
             for(k = 0; k < clustc; ++k) {
@@ -151,7 +148,6 @@ double run() {
             break;
         }
     } while (++iter <= max_iter);
-    free_st_matrix(&prev_memb);
     return adeq;
 }
 
