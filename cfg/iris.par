@@ -1,10 +1,9 @@
 150
 3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-/home/diogo/Documents/University/masters/data/datasets/iris/iris.data.1
-out-iris.txt
+matrix_file_name (string)
+output_file_name (string)
 3
-2
-100
+number_of_instances (integer)
+maximum_iterations (integer)
 1e-10
-2.0
-2.0
+RAND

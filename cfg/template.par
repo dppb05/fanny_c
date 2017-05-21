@@ -1,10 +1,9 @@
-number_of_objects(N)
-number_of_labels label_1 label_2 ... label_N
-matrix_file_name
-output_file_name
-number_of_clusters
-number_of_instances
-maximum_iterations
-parameter_epsilon
-parameter_m
-parameter_q
+number_of_objects (integer)
+number_of_labels (integer) label_1 label_2 ... label_N (integer)
+matrix_file_name (string)
+output_file_name (string)
+number_of_clusters (integer)
+number_of_instances (integer)
+maximum_iterations (integer)
+parameter_epsilon (double)
+seed (integer)
