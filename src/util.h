@@ -35,6 +35,8 @@ bool dgt(double a, double b);
 
 bool dlt(double a, double b);
 
+int cmpdouble(double a, double b);
+
 int cmpint(const void *a, const void *b);
 
 int max(int *vec, size_t size);

@@ -81,7 +81,122 @@ double adequacy() {
     return adeq;
 }
 
+void update_memb() {
+    double a_val[clustc];
+    bool a_val_zero[clustc]; // if a_val_zero[k] -> a_val[k] == 0
+    int zeroc; // number of a_val_zero[k] == true
+    bool v_set[clustc];
+    double term1;
+    double term2[clustc];
+    double den[clustc];
+    double v_den;
+    double val;
+    double new_memb[clustc];
+    size_t e;
+    size_t h;
+    size_t i;
+    size_t k;
+    // pre-compute values
+    for(k = 0; k < clustc; ++k) {
+        term2[k] = 0.0;
+        den[k] = 0.0;
+        for(i = 0; i < objc; ++i) {
+            val = pow(get(&memb, i, k), 2.0);
+            den[k] += val;
+            for(h = 0; h < objc; ++h) {
+                term2[k] += val * pow(get(&memb, h, k), 2.0) *
+                    get(&dmatrix, i, h);
+            }
+        }
+    }
+    for(i = 0; i < objc; ++i) {
+        zeroc = 0;
+        for(k = 0; k < clustc; ++k) {
+            term1 = 0.0;
+            for(h = 0; h < objc; ++h) {
+                term1 += pow(get(&memb, h, k), 2.0) * get(&dmatrix, i, h);
+            }
+            a_val[k] = ((2.0 * term1) / den[k])
+                - (term2[k] / pow(den[k], 2.0));
+            if(cmpdouble(a_val[k], 0.0) == 0) {
+                ++zeroc;
+                a_val_zero[k] = true;
+            } else {
+                a_val_zero[k] = false;
+            }
+        }
+        if(zeroc) {
+            // treat the degenerate case
+            val = 1.0 / (double) zeroc;
+            for(k = 0; k < clustc; ++k) {
+                if(a_val_zero[k]) {
+                    set(&memb, i, k, val);
+                } else {
+                    set(&memb, i, k, 0.0);
+                }
+            }
+        } else {
+            val = 0.0;
+            for(k = 0; k < clustc; ++k) {
+                a_val[k] = 1.0 / a_val[k];
+                val += a_val[k];
+            }
+            v_den = 0.0;
+            for(k = 0; k < clustc; ++k) {
+                new_memb[k] = a_val[k] / val;
+                if(cmpdouble(new_memb[k], 0.0) > 0) {
+                    v_set[k] = true;
+                    v_den += a_val[k];
+                } else {
+                    v_set[k] = false;
+                }
+            }
+            for(k = 0; k < clustc; ++k) {
+                if(v_set[k]) {
+                    set(&memb, i, k, a_val[k] / v_den);
+                } else {
+                    set(&memb, i, k, 0.0);
+                }
+            }
+        }
+    }
+}
+
 double run() {
+    init_memb();
+    print_memb();
+    size_t iter = 1;
+    double adeq;
+    double prev_adeq;
+    double adeq_diff;
+    adeq = adequacy();
+    printf("Adequacy: %.15lf\n", adeq);
+    while(true) {
+        printf("Iteration %d:\n", iter);
+        update_memb();
+        print_memb();
+        prev_adeq = adeq;
+        adeq = adequacy();
+        printf("Adequacy: %.15lf\n", adeq);
+        adeq_diff = prev_adeq - adeq;
+        if(adeq_diff < 0.0) {
+            adeq_diff = abs(adeq_diff);
+            printf("Warn: previous adequacy is greater than "
+                   "current (%.15lf).\n", adeq_diff);
+        }
+        if(adeq_diff < epsilon) {
+            printf("Adequacy coefficient threshold reached.\n");
+            break;
+        }
+        if(iter++ > max_iter) {
+            printf("Maximum number of iterations reached.\n");
+            break;
+        }
+    }
+    return adeq;
+}
+
+double run_old() {
     init_memb();
     print_memb();
     size_t e;
